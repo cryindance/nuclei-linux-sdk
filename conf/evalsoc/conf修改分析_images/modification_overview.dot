@@ -1,0 +1,41 @@
+digraph FileModificationOverview {
+    rankdir=TB;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=10];
+    edge [fontname="Arial", fontsize=9];
+    
+    // 标题
+    labelloc="t";
+    label="配置文件修改范围概览";
+    fontsize=14;
+    
+    // 修改的文件
+    build [label="build.mk\nSIMULATION=0", fillcolor="#3498db", fontcolor=white];
+    freeloader [label="freeloader.mk\n地址/CLM→L2", fillcolor="#3498db", fontcolor=white];
+    dts [label="nuclei_rv64imafdc.dts\n地址映射/CPU", fillcolor="#e74c3c", fontcolor=white];
+    flash_config [label="uboot_rv64imac_flash\n启动地址", fillcolor="#3498db", fontcolor=white];
+    sd_imac [label="uboot_rv64imac_sd\nSMP配置", fillcolor="#3498db", fontcolor=white];
+    sd_imafdc [label="uboot_rv64imafdc_sd\n多地址/功能", fillcolor="#3498db", fontcolor=white];
+    doc [label="Nuclei_HSM_Secure_Boot.md\n文档更新", fillcolor="#9b59b6", fontcolor=white];
+    
+    // 影响范围
+    subgraph cluster_impact {
+        label="核心影响";
+        style="rounded,filled";
+        fillcolor="#f0f0f0";
+        color="#34495e";
+        
+        address [label="地址空间迁移\n0x80000000 → 0x90000000", fillcolor="#f39c12", fontcolor=white];
+        cpu [label="CPU配置\n8核→2核 双核启用", fillcolor="#f39c12", fontcolor=white];
+        boot [label="启动流程\n地址/功能调整", fillcolor="#f39c12", fontcolor=white];
+    }
+    
+    // 连接关系
+    build -> address [style=invis];
+    freeloader -> address [style=invis];
+    dts -> address [style=invis];
+    dts -> cpu [style=invis];
+    flash_config -> boot [style=invis];
+    sd_imac -> boot [style=invis];
+    sd_imafdc -> boot [style=invis];
+}

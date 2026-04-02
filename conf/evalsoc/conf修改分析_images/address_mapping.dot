@@ -1,0 +1,55 @@
+digraph AddressMappingComparison {
+    rankdir=TB;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=10];
+    edge [fontname="Arial", fontsize=9];
+    
+    // 标题
+    labelloc="t";
+    label="Nuclei SoC 地址映射变更对比";
+    fontsize=14;
+    
+    // 旧地址空间
+    subgraph cluster_old {
+        label="旧地址空间 (0x80000000)";
+        style="rounded,filled";
+        fillcolor="#ffcccc";
+        color="#e74c3c";
+        
+        old_plic [label="PLIC\n0x04000000", fillcolor="#e74c3c", fontcolor=white];
+        old_clint [label="CLINT\n0x0031000", fillcolor="#e74c3c", fontcolor=white];
+        old_uart0 [label="UART0\n0x90120000", fillcolor="#e74c3c", fontcolor=white];
+        old_uart1 [label="UART1\n0x90122000", fillcolor="#e74c3c", fontcolor=white];
+        old_qspi0 [label="QSPI0\n0x90180000", fillcolor="#e74c3c", fontcolor=white];
+        old_qspi2 [label="QSPI2\n0x901a0000", fillcolor="#e74c3c", fontcolor=white];
+        old_mailbox [label="Mailbox\n0x97000000", fillcolor="#e74c3c", fontcolor=white];
+        old_uboot [label="U-Boot\n0x80200000", fillcolor="#e74c3c", fontcolor=white];
+    }
+    
+    // 新地址空间
+    subgraph cluster_new {
+        label="新地址空间 (0x90000000)";
+        style="rounded,filled";
+        fillcolor="#ccffcc";
+        color="#27ae60";
+        
+        new_plic [label="PLIC\n0x1c000000", fillcolor="#27ae60", fontcolor=white];
+        new_clint [label="CLINT\n0x18031000", fillcolor="#27ae60", fontcolor=white];
+        new_uart0 [label="UART0\n0x04001000", fillcolor="#27ae60", fontcolor=white];
+        new_uart1 [label="UART1\n0x96000000", fillcolor="#27ae60", fontcolor=white];
+        new_qspi0 [label="QSPI0\n0x14101000", fillcolor="#27ae60", fontcolor=white];
+        new_qspi2 [label="QSPI2\n0x14102000", fillcolor="#27ae60", fontcolor=white];
+        new_mailbox [label="Mailbox\n0x08800000", fillcolor="#27ae60", fontcolor=white];
+        new_uboot [label="U-Boot\n0x90200000", fillcolor="#27ae60", fontcolor=white];
+    }
+    
+    // 映射关系
+    old_plic -> new_plic [style=dashed, color="#3498db", fontsize=9];
+    old_clint -> new_clint [style=dashed, color="#3498db", fontsize=9];
+    old_uart0 -> new_uart0 [style=dashed, color="#3498db", fontsize=9];
+    old_uart1 -> new_uart1 [style=dashed, color="#3498db", fontsize=9];
+    old_qspi0 -> new_qspi0 [style=dashed, color="#3498db", fontsize=9];
+    old_qspi2 -> new_qspi2 [style=dashed, color="#3498db", fontsize=9];
+    old_mailbox -> new_mailbox [style=dashed, color="#3498db", fontsize=9];
+    old_uboot -> new_uboot [style=dashed, color="#3498db", fontsize=9];
+}

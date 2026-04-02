@@ -1,0 +1,43 @@
+digraph CPUConfiguration {
+    rankdir=LR;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11];
+    edge [fontname="Arial", fontsize=9];
+    
+    // 标题
+    labelloc="t";
+    label="CPU配置变更";
+    fontsize=14;
+    
+    // 旧配置
+    subgraph cluster_old {
+        label="旧配置";
+        style="rounded,filled";
+        fillcolor="#ffcccc";
+        color="#e74c3c";
+        
+        old_cpu [label="CPU核心数\n8核", fillcolor="#e74c3c", fontcolor=white];
+        old_cpu1 [label="CPU1状态\ndisabled", fillcolor="#f39c12", fontcolor=white];
+        old_clock [label="CPU时钟\n50MHz", fillcolor="#e74c3c", fontcolor=white];
+        old_periph [label="外设时钟\n跟随CPU", fillcolor="#e74c3c", fontcolor=white];
+    }
+    
+    // 新配置
+    subgraph cluster_new {
+        label="新配置";
+        style="rounded,filled";
+        fillcolor="#ccffcc";
+        color="#27ae60";
+        
+        new_cpu [label="CPU核心数\n2核", fillcolor="#27ae60", fontcolor=white];
+        new_cpu1 [label="CPU1状态\nokay", fillcolor="#27ae60", fontcolor=white];
+        new_clock [label="CPU时钟\n100MHz", fillcolor="#27ae60", fontcolor=white];
+        new_periph [label="外设时钟\n32MHz", fillcolor="#27ae60", fontcolor=white];
+    }
+    
+    // 变更箭头
+    old_cpu -> new_cpu [label="精简", color="#3498db", fontsize=10, penwidth=2];
+    old_cpu1 -> new_cpu1 [label="启用", color="#3498db", fontsize=10, penwidth=2];
+    old_clock -> new_clock [label="加速", color="#3498db", fontsize=10, penwidth=2];
+    old_periph -> new_periph [label="独立", color="#3498db", fontsize=10, penwidth=2];
+}

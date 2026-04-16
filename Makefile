@@ -446,10 +446,15 @@ $(boot_zip): $(boot_wrkdir) $(boot_image) $(boot_initrd) $(boot_kernel_dtb) $(ub
 optee: optee_os optee_client optee_test optee_example
 
 # 2th level optee_os build
+# Fix: 添加 CFLAGS64 以修复 libgcc ABI 检测问题
+# OPTEE 的 riscv.mk 中 gcc.mk 在 MARCH/MABI 设置之前被 include，
+# 导致 libgcc 检测使用了错误的软浮点库（lp64 而非 lp64d）。
+# 通过在命令行中提前设置 CFLAGS64，确保 libgcc 检测使用正确的 ABI。
 optee_os: $(target_gcc) $(optee_os_srcdir)
 	$(MAKE) -C $(optee_os_srcdir) O=$(optee_os_wrkdir) CROSS_COMPILE64=$(CROSS_COMPILE) ARCH=riscv CFG_RV64_core=y \
 	CFG_TZDRAM_START=$(OPTEE_OS_TZDRAM_START) CFG_TZDRAM_SIZE=$(OPTEE_OS_TZDRAM_SIZE) CFG_SHMEM_START=$(OPTEE_OS_SHMEM_START) \
-	CFG_SHMEM_SIZE=$(OPTEE_OS_SHMEM_SIZE) PLATFORM=$(optee_os_platform) ta-targets=ta_rv64 MARCH=$(ISA) MABI=$(ABI)
+	CFG_SHMEM_SIZE=$(OPTEE_OS_SHMEM_SIZE) PLATFORM=$(optee_os_platform) ta-targets=ta_rv64 MARCH=$(ISA) MABI=$(ABI) \
+	CFLAGS64="-march=$(ISA) -mabi=$(ABI)"
 
 # 2th level optee_client build
 optee_client: $(target_gcc) $(optee_client_srcdir) $(buildroot_initramfs_sysroot)

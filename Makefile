@@ -466,14 +466,14 @@ optee_client: $(target_gcc) $(optee_client_srcdir) $(buildroot_initramfs_sysroot
 # 3th level optee_test build
 optee_test: $(target_gcc) optee_client optee_os $(buildroot_initramfs_sysroot)
 	$(MAKE) -C $(optee_test_srcdir) O=$(optee_test_wrkdir) CROSS_COMPILE=$(CROSS_COMPILE) OPTEE_CLIENT_EXPORT=$(optee_client_export) \
-	--no-builtin-variables TA_DEV_KIT_DIR=$(optee_os_export) MARCH=$(ISA) MABI=$(ABI) OPENSSL_INSTALL_PATH=$(buildroot_initramfs_sysroot)/usr
+	--no-builtin-variables TA_DEV_KIT_DIR=$(optee_os_export) MARCH=$(ISA) MABI=$(ABI) CFLAGS64="-march=$(ISA) -mabi=$(ABI)" OPENSSL_INSTALL_PATH=$(buildroot_initramfs_wrkdir)/host/riscv64-buildroot-linux-gnu/sysroot/usr
 	#copy optee test ca,ta,plugin
 	mkdir -p $(buildroot_initramfs_sysroot)/lib/optee_armtz && mkdir -p $(buildroot_initramfs_sysroot)/usr/lib/tee-supplicant/plugins && if ls $(optee_test_tadir)/*/*.ta >/dev/null 2>&1 ;then cp -af $(optee_test_tadir)/*/*.ta $(buildroot_initramfs_sysroot)/lib/optee_armtz/; fi && if [ -f $(optee_test_xtest) ];then cp -af $(optee_test_xtest) $(buildroot_initramfs_sysroot)/usr/bin/; fi && if ls $(optee_test_plugindir)/*.plugin >/dev/null 2>&1 ;then cp -af $(optee_test_plugindir)/*.plugin $(buildroot_initramfs_sysroot)/usr/lib/tee-supplicant/plugins/; fi
 
 # 3th level optee_example build
 optee_example: $(target_gcc) $(optee_example_srcdir) optee_client optee_os
 	cp -af $(optee_example_srcdir)  $(wrkdir)/optee/
-	$(MAKE) -C $(optee_example_wrkdir) HOST_CROSS_COMPILE=$(CROSS_COMPILE) TEEC_EXPORT=$(optee_client_export) --no-builtin-variables TA_DEV_KIT_DIR=$(optee_os_export) MARCH=$(ISA) MABI=$(ABI)
+	$(MAKE) -C $(optee_example_wrkdir) HOST_CROSS_COMPILE=$(CROSS_COMPILE) TEEC_EXPORT=$(optee_client_export) --no-builtin-variables TA_DEV_KIT_DIR=$(optee_os_export) MARCH=$(ISA) MABI=$(ABI) CFLAGS64="-march=$(ISA) -mabi=$(ABI)"
 	#copy optee example ca,ta,plugin
 	if ls $(optee_example_cadir)/* >/dev/null 2>&1 ;then cp -af $(optee_example_cadir)/* $(buildroot_initramfs_sysroot)/usr/bin; fi
 	mkdir -p $(buildroot_initramfs_sysroot)/lib/optee_armtz && \

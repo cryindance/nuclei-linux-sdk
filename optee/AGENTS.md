@@ -242,7 +242,7 @@ CFG_TEE_CORE_NB_CORE=8             # CPU核心数
 
 - **README.md** - 详细使用说明和启动日志
 - **README_en.md** - 英文版说明
-- **PROJECT_ANALYSIS.md** - 项目详细分析文档
+- **[../doc/optee/PROJECT_ANALYSIS.md](../doc/optee/PROJECT_ANALYSIS.md)** - 项目详细分析文档
 - **optee_riscv_arch.png** - 架构图
 - **optee_os/CHANGELOG.md** - 版本变更日志
 

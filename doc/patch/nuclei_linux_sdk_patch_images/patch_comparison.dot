@@ -1,0 +1,45 @@
+digraph PatchComparison {
+    rankdir=LR;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11];
+    edge [fontname="Arial", fontsize=9];
+    
+    // 左侧：Patch 文件
+    subgraph cluster_patches {
+        label="nuclei-linux-sdk_patch\n补丁文件";
+        style=filled;
+        color=lightblue;
+        
+        P_PCI [label="0001-pci.patch\n类型转换修复", fillcolor="#3498db", fontcolor=white];
+        P_FDT [label="0002-fdt.patch\nprintf 格式修复", fillcolor="#3498db", fontcolor=white];
+        P_GP5 [label="0005-GP_defs.h.patch\n调试日志启用", fillcolor="#f39c12", fontcolor=black];
+        P_GP6 [label="0006-TTA_TCF.patch\nTOCTOU 安全修复", fillcolor="#e74c3c", fontcolor=white];
+    }
+    
+    // 右侧：当前项目代码
+    subgraph cluster_current {
+        label="当前项目代码\n(u-boot, optee_test)";
+        style=filled;
+        color=lightgreen;
+        
+        C_PCI [label="cmd/pci.c\n已包含类型转换", fillcolor="#27ae60", fontcolor=white];
+        C_FDT [label="lib/fdtdec.c\n已包含格式修复", fillcolor="#27ae60", fontcolor=white];
+        C_GP5 [label="optee_test/\ngp/patches/\n需验证", fillcolor="#f39c12", fontcolor=black];
+        C_GP6 [label="optee_test/\nTTA_TCF.c\n需验证", fillcolor="#e74c3c", fontcolor=white];
+    }
+    
+    // 连接线
+    P_PCI -> C_PCI [label="已应用", color="#27ae60", penwidth=2];
+    P_FDT -> C_FDT [label="已应用", color="#27ae60", penwidth=2];
+    P_GP5 -> C_GP5 [label="需确认", color="#f39c12", penwidth=2, style=dashed];
+    P_GP6 -> C_GP6 [label="需确认", color="#e74c3c", penwidth=2, style=dashed];
+    
+    // 状态说明
+    Applied [label="✓ 已应用", fillcolor="#27ae60", fontcolor=white];
+    Verify [label="? 需验证", fillcolor="#f39c12", fontcolor=black];
+    
+    // 标题
+    labelloc="t";
+    label="Patch 文件与当前代码对比状态";
+    fontsize=14;
+}

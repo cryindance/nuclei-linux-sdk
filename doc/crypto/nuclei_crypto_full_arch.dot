@@ -1,0 +1,96 @@
+digraph NucleiCryptoArchitecture {
+    rankdir=TB;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11];
+    edge [fontname="Arial", fontsize=9];
+    
+    // 用户空间层
+    UserApp [label="用户空间应用\n(OpenSSL / dm-crypt / TLS / IPSec)", fillcolor="#e74c3c", fontcolor=white];
+    
+    // 内核接口层
+    CryptoAPI [label="Linux Crypto API\n(crypto_alloc_skcipher / crypto_alloc_ahash)", fillcolor="#3498db", fontcolor=white];
+    
+    // 驱动注册层
+    CryptoCore [label="Nuclei 密码学核心驱动\nnuclei_crypto.c", fillcolor="#3498db", fontcolor=white];
+    
+    // 算法实现层 - 已实现的
+    Skcipher [label="对称加密 (SKCIPHER)\nnuclei_crypto_skcipher.c", fillcolor="#27ae60", fontcolor=white];
+    Ahash [label="哈希算法 (AHASH)\nnuclei_crypto_ahash.c", fillcolor="#27ae60", fontcolor=white];
+    
+    // 对称加密具体算法
+    AES [label="AES\nECB / CBC / CTR\n128/192/256 bit", fillcolor="#2ecc71", fontcolor=white];
+    SM4 [label="SM4\nECB / CBC\n128 bit", fillcolor="#2ecc71", fontcolor=white];
+    
+    // 哈希具体算法
+    SHA [label="SHA-1 / SHA-256\nMD5", fillcolor="#2ecc71", fontcolor=white];
+    HMAC [label="HMAC-SHA1\nHMAC-SHA256\nHMAC-MD5", fillcolor="#2ecc71", fontcolor=white];
+    
+    // 未实现的 - 灰色虚线框
+    Unimplemented [label="ABI 定义但未实现", fillcolor="#95a5a6", fontcolor=white, style="dashed,filled"];
+    ACRYP [label="非对称加密 (ACRYP)\nRSA / SM2 / ED25519\n签名/验证", fillcolor="#bdc3c7", fontcolor="#2c3e50", style="dashed,filled"];
+    TRNG [label="真随机数 (TRNG)\n硬件熵源", fillcolor="#bdc3c7", fontcolor="#2c3e50", style="dashed,filled"];
+    EFUSE [label="eFuse 读写\n密钥存储 / 安全配置", fillcolor="#bdc3c7", fontcolor="#2c3e50", style="dashed,filled"];
+    BOOT [label="安全启动 (BOOT)\n安全引导验证", fillcolor="#bdc3c7", fontcolor="#2c3e50", style="dashed,filled"];
+    
+    // Fallback 路径
+    Fallback [label="软件 Fallback\n(AES-generic / SHA-software)", fillcolor="#f39c12", fontcolor=white];
+    
+    // 引擎层
+    Engine [label="Crypto Engine\n异步请求调度", fillcolor="#9b59b6", fontcolor=white];
+    
+    // Mailbox 层
+    MailboxDriver [label="Mailbox 控制器驱动\nnuclei-mailbox.c", fillcolor="#3498db", fontcolor=white];
+    MailboxHW [label="Mailbox 硬件\n8通道 SRAM 共享内存", fillcolor="#3498db", fontcolor=white];
+    
+    // HSM 硬件层
+    HSM [label="Nuclei HSM 安全核\n(独立安全域 / TrustZone)", fillcolor="#1abc9c", fontcolor=white, shape=component];
+    
+    // 完成回调
+    Complete [label="请求完成回调\n中断处理 + DMA 解映射", fillcolor="#27ae60", fontcolor=white];
+    
+    // 连接关系
+    UserApp -> CryptoAPI [label="1. 调用密码学操作"];
+    CryptoAPI -> CryptoCore [label="2. 查找已注册算法"];
+    
+    CryptoCore -> Skcipher [label="3a. 对称加密请求"];
+    CryptoCore -> Ahash [label="3b. 哈希请求"];
+    CryptoCore -> Unimplemented [label="3c. 未实现接口", style=dashed, color="#95a5a6"];
+    
+    Skcipher -> AES [label="AES"];
+    Skcipher -> SM4 [label="SM4"];
+    Ahash -> SHA [label="HASH"];
+    Ahash -> HMAC [label="HMAC"];
+    
+    Unimplemented -> ACRYP [style=dashed, color="#95a5a6"];
+    Unimplemented -> TRNG [style=dashed, color="#95a5a6"];
+    Unimplemented -> EFUSE [style=dashed, color="#95a5a6"];
+    Unimplemented -> BOOT [style=dashed, color="#95a5a5a6"];
+    
+    // Fallback 判断
+    Skcipher -> Fallback [label="数据不对齐 /\n长度不合法", style=dashed, color="#f39c12"];
+    Ahash -> Fallback [label="不对齐 /\n不支持的模式", style=dashed, color="#f39c12"];
+    Fallback -> Complete [label="软件计算完成", style=dashed, color="#f39c12"];
+    
+    // 正常硬件路径
+    AES -> Engine [label="4. 提交异步请求"];
+    SM4 -> Engine [label="4. 提交异步请求"];
+    SHA -> Engine [label="4. 提交异步请求"];
+    HMAC -> Engine [label="4. 提交异步请求"];
+    
+    Engine -> MailboxDriver [label="5. DMA映射 +\n构建命令"];
+    MailboxDriver -> MailboxHW [label="6. 写入 SRAM"];
+    MailboxHW -> HSM [label="7. ABI 命令\n(HASH/CRYP/ACRYP)"];
+    
+    HSM -> MailboxHW [label="8. 处理完成\n中断通知"];
+    MailboxHW -> MailboxDriver [label="9. 读取结果"];
+    MailboxDriver -> Complete [label="10. DMA解映射"];
+    
+    Complete -> CryptoAPI [label="11. 返回结果"];
+    CryptoAPI -> UserApp [label="12. 用户空间收到数据"];
+    
+    // 标题
+    labelloc="t";
+    label="Nuclei HSM 密码学接口全景架构图";
+    fontsize=18;
+    fontname="Arial";
+}

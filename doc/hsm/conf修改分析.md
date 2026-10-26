@@ -366,7 +366,7 @@ U-Boot启动地址从 `0x80000000` 空间整体迁移到 `0x90000000` 空间：
 - `conf/evalsoc/uboot_rv64imac_flash_config` - Flash启动配置
 - `conf/evalsoc/uboot_rv64imac_sd_config` - SD启动配置（imac）
 - `conf/evalsoc/uboot_rv64imafdc_sd_config` - SD启动配置（imafdc）
-- `conf/evalsoc/Nuclei_HSM_Secure_Boot.md` - 安全启动文档
+- `Nuclei_HSM_Secure_Boot.md` - 安全启动文档
 
 ---
 

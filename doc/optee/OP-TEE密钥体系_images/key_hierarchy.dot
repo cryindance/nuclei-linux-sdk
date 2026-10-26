@@ -1,0 +1,52 @@
+digraph OPTEE_Key_Hierarchy {
+    rankdir=TB;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11];
+    edge [fontname="Arial", fontsize=9];
+    
+    // 根节点
+    HUK [label="HUK\n硬件唯一密钥\n16字节", fillcolor="#e74c3c", fontcolor=white];
+    
+    // 第一层派生
+    SSK [label="SSK\n安全存储根密钥\nHUK_SUBKEY_SSK\n32字节", fillcolor="#3498db", fontcolor=white];
+    RPMB [label="RPMB Key\nHUK_SUBKEY_RPMB\n32字节", fillcolor="#3498db", fontcolor=white];
+    TAU [label="TA Unique Key\nHUK_SUBKEY_UNIQUE_TA\n16-32字节", fillcolor="#3498db", fontcolor=white];
+    TENC [label="TA Enc Key\nHUK_SUBKEY_TA_ENC\n16字节", fillcolor="#3498db", fontcolor=white];
+    DIE [label="Die ID\nHUK_SUBKEY_DIE_ID", fillcolor="#3498db", fontcolor=white];
+    
+    // SSK 分支
+    TSK [label="TSK\nTA存储密钥\nHMAC(SSK, UUID)\n32字节", fillcolor="#3498db", fontcolor=white];
+    FEK [label="FEK\n文件加密密钥\nTRNG生成\n16字节", fillcolor="#3498db", fontcolor=white];
+    ENCFEK [label="enc_fek\n(AES-ECB加密)", fillcolor="#9b59b6", fontcolor=white];
+    FILEDATA [label="文件数据+Hash Tree\n(AES-GCM加密)", fillcolor="#27ae60", fontcolor=white];
+    
+    // TA Unique Key 分支
+    TRUSTED [label="Trusted Keys TA\nSeal/Unseal", fillcolor="#27ae60", fontcolor=white];
+    KERNEL [label="Linux Kernel\nTrusted Keys", fillcolor="#27ae60", fontcolor=white];
+    
+    // RPMB 分支
+    RPMBAUTH [label="RPMB 帧认证\nHMAC-SHA256", fillcolor="#27ae60", fontcolor=white];
+    
+    // 连接关系
+    HUK -> SSK [label="huk_subkey_derive()"];
+    HUK -> RPMB [label="huk_subkey_derive(CID)"];
+    HUK -> TAU [label="huk_subkey_derive(UUID+extra)"];
+    HUK -> TENC [label="huk_subkey_derive(pub_key)"];
+    HUK -> DIE [label="huk_subkey_derive()"];
+    
+    SSK -> TSK [label="do_hmac()"];
+    TSK -> FEK [label="AES-ECB-NOPAD\n加密/解密"];
+    FEK -> ENCFEK [label="存储到磁盘"];
+    ENCFEK -> FEK [label="读取时解密"];
+    FEK -> FILEDATA [label="AES-GCM"];
+    
+    TAU -> TRUSTED [label="PTA_SYSTEM_DERIVE_\nTA_UNIQUE_KEY"];
+    TRUSTED -> KERNEL [label="AES-256-GCM\nSeal/Unseal"];
+    
+    RPMB -> RPMBAUTH [label="RPMB MAC"];
+    
+    // 图标题
+    labelloc="t";
+    label="OP-TEE 密钥派生体系架构图";
+    fontsize=14;
+}

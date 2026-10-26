@@ -1,0 +1,57 @@
+digraph RootCause {
+    rankdir=TB;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11];
+    edge [fontname="Arial", fontsize=9];
+
+    // 顶层问题节点
+    Problem1 [label="问题1：openssl/bn.h 缺失\n链接时 libc.so ld script 报错", fillcolor="#e74c3c", fontcolor=white];
+    Problem2 [label="问题2：ABI 不匹配\ndouble-float vs soft-float", fillcolor="#e74c3c", fontcolor=white];
+
+    // 根因节点
+    Cause1a [label="OPENSSL_INSTALL_PATH 指向\nbuildroot_initramfs_sysroot/usr\n（运行时 rootfs，无头文件）", fillcolor="#f39c12", fontcolor=white];
+    Cause1b [label="CFLAGS += -I.../include\n被注释掉", fillcolor="#f39c12", fontcolor=white];
+    Cause1c [label="LDFLAGS += -L.../lib\n指向 sysroot/usr/lib\n其中 libc.so 是 GNU ld script\n含绝对路径 /lib64/lp64d/...", fillcolor="#f39c12", fontcolor=white];
+
+    Cause2a [label="optee_client / optee_test / optee_examples\n子模块 Makefile 未传递 MARCH/MABI", fillcolor="#f39c12", fontcolor=white];
+    Cause2b [label="optee_client/flags.mk 中\noverride CFLAGS += 后\n普通 CFLAGS += 失效", fillcolor="#f39c12", fontcolor=white];
+    Cause2c [label="ta_dev_kit.mk 缺失\narch-bits-ta_rv64 := 64\n导致链软-float libgcc", fillcolor="#f39c12", fontcolor=white];
+
+    // 修复节点
+    Fix1a [label="修复：OPENSSL_INSTALL_PATH\n改为 buildroot host sysroot", fillcolor="#3498db", fontcolor=white];
+    Fix1b [label="修复：取消注释 CFLAGS\n移除 -L 改为直接链接\nlibcrypto.a", fillcolor="#3498db", fontcolor=white];
+
+    Fix2a [label="修复：所有子 make\n显式传递 MARCH/MABI", fillcolor="#3498db", fontcolor=white];
+    Fix2b [label="修复：flags.mk 使用\noverride CFLAGS/LDFLAGS", fillcolor="#3498db", fontcolor=white];
+    Fix2c [label="修复：补充\narch-bits-ta_rv64 := 64", fillcolor="#3498db", fontcolor=white];
+
+    // 结果节点
+    Result [label="make optee / freeloader / bootimages\n全部编译通过", fillcolor="#27ae60", fontcolor=white];
+
+    // 边
+    Cause1a -> Problem1;
+    Cause1b -> Problem1;
+    Cause1c -> Problem1;
+
+    Cause2a -> Problem2;
+    Cause2b -> Problem2;
+    Cause2c -> Problem2;
+
+    Problem1 -> Fix1a;
+    Problem1 -> Fix1b;
+
+    Problem2 -> Fix2a;
+    Problem2 -> Fix2b;
+    Problem2 -> Fix2c;
+
+    Fix1a -> Result;
+    Fix1b -> Result;
+    Fix2a -> Result;
+    Fix2b -> Result;
+    Fix2c -> Result;
+
+    // 标题
+    labelloc="t";
+    label="OP-TEE 编译问题根因与修复流程";
+    fontsize=14;
+}

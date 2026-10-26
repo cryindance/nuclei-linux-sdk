@@ -1,0 +1,49 @@
+digraph PatchAnalysis {
+    rankdir=TB;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11];
+    edge [fontname="Arial", fontsize=9];
+    
+    // 顶层节点
+    PatchFolder [label="nuclei-linux-sdk_patch\n补丁文件夹", fillcolor="#e74c3c", fontcolor=white, shape=folder];
+    
+    // 分类节点
+    UBoot [label="U-Boot\n3个补丁文件", fillcolor="#3498db", fontcolor=white];
+    OPTEE [label="OP-TEE\n13个补丁文件", fillcolor="#3498db", fontcolor=white];
+    Conf [label="Conf\n38个配置文件", fillcolor="#9b59b6", fontcolor=white];
+    OpenSBI [label="OpenSBI\n无补丁(子模块)", fillcolor="#95a5a6", fontcolor=white];
+    
+    // U-Boot 补丁详情
+    UB1 [label="0001-pci.patch\n已应用", fillcolor="#27ae60", fontcolor=white];
+    UB2 [label="0002-fdt.patch\n已应用", fillcolor="#27ae60", fontcolor=white];
+    UB3 [label="0003-sandbox.patch\n已应用", fillcolor="#27ae60", fontcolor=white];
+    
+    // OP-TEE 补丁详情
+    OP1 [label="0001-0012:\n测试适配补丁\n已应用", fillcolor="#27ae60", fontcolor=white];
+    OP5 [label="0005-GP_defs.h:\n调试日志补丁\n需确认", fillcolor="#f39c12", fontcolor=black];
+    OP6 [label="0006-TTA_TCF:\n安全修复\n需确认", fillcolor="#e74c3c", fontcolor=white];
+    
+    // 配置文件
+    Cfg [label="opensbi_*.conf\n设备配置覆盖层", fillcolor="#9b59b6", fontcolor=white];
+    
+    // 连接
+    PatchFolder -> UBoot;
+    PatchFolder -> OPTEE;
+    PatchFolder -> Conf;
+    PatchFolder -> OpenSBI;
+    
+    UBoot -> UB1;
+    UBoot -> UB2;
+    UBoot -> UB3;
+    
+    OPTEE -> OP1;
+    OPTEE -> OP5;
+    OPTEE -> OP6;
+    
+    Conf -> Cfg;
+    
+    // 标题
+    labelloc="t";
+    label="Nuclei Linux SDK Patch 文件结构分析";
+    fontsize=14;
+}

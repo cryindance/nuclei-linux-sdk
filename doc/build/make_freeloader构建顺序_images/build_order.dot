@@ -1,0 +1,60 @@
+digraph BuildOrder {
+    rankdir=TB;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11];
+    edge [fontname="Arial", fontsize=9];
+    
+    // 顶层目标
+    Target [label="make freeloader\n(顶层目标)", fillcolor="#e74c3c", fontcolor=white, shape=doubleoctagon];
+    
+    // 直接依赖
+    FreeloaderELF [label="freeloader.elf\n(最终产物)", fillcolor="#27ae60", fontcolor=white];
+    
+    // 中间产物
+    UbootSPLBin [label="u-boot-spl-nodtb.bin\n(U-Boot SPL)", fillcolor="#3498db", fontcolor=white];
+    UbootSPLITB [label="uboot_spl.itb\n(ITB打包镜像)", fillcolor="#3498db", fontcolor=white];
+    PlatformDTB [label="spl.dtb\n(设备树)", fillcolor="#3498db", fontcolor=white];
+    BootZIP [label="boot.zip\n(SD卡启动镜像)", fillcolor="#9b59b6", fontcolor=white];
+    AMPBins [label="ampfw_core*.bin\n(AMP固件，可选)", fillcolor="#f39c12", fontcolor=white];
+    
+    // ITB的依赖
+    OpenSBI [label="OpenSBI\n(fw_jump.bin)", fillcolor="#3498db", fontcolor=white];
+    UBoot [label="U-Boot\n(u-boot.bin)", fillcolor="#3498db", fontcolor=white];
+    OPTEE [label="OP-TEE OS\n(tee-pager_v2.bin)", fillcolor="#3498db", fontcolor=white];
+    
+    // BootZIP的依赖
+    Linux [label="Linux Kernel\n(vmlinux, Image)", fillcolor="#9b59b6", fontcolor=white];
+    Buildroot [label="Buildroot\n(rootfs)", fillcolor="#9b59b6", fontcolor=white];
+    
+    // 基础工具
+    Toolchain [label="交叉编译器\n(riscv64-unknown-linux-gnu-gcc)", fillcolor="#95a5a6", fontcolor=white];
+    
+    // 连接关系
+    Target -> FreeloaderELF;
+    
+    FreeloaderELF -> UbootSPLBin [label="依赖"];
+    FreeloaderELF -> UbootSPLITB [label="依赖"];
+    FreeloaderELF -> PlatformDTB [label="依赖"];
+    FreeloaderELF -> BootZIP [label="BOOT_MODE=sd"];
+    FreeloaderELF -> AMPBins [label="可选"];
+    
+    UbootSPLITB -> OpenSBI [label="包含"];
+    UbootSPLITB -> UBoot [label="包含"];
+    UbootSPLITB -> OPTEE [label="包含"];
+    UbootSPLITB -> PlatformDTB [label="包含"];
+    
+    BootZIP -> Linux [label="包含"];
+    BootZIP -> Buildroot [label="包含"];
+    
+    OpenSBI -> Toolchain [label="需要"];
+    UBoot -> Toolchain [label="需要"];
+    OPTEE -> Toolchain [label="需要"];
+    Linux -> Toolchain [label="需要"];
+    Buildroot -> Toolchain [label="需要"];
+    
+    // 标题
+    labelloc="t";
+    label="make freeloader 构建顺序依赖图";
+    fontsize=16;
+    fontname="Arial";
+}

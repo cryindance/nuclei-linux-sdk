@@ -1,0 +1,72 @@
+digraph CryptoInterfaceArchitecture {
+    rankdir=TB;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11];
+    edge [fontname="Arial", fontsize=9];
+    
+    // 用户层
+    UserApp [label="用户空间应用\n(OpenSSL / dm-crypt / TLS)", fillcolor="#e74c3c", fontcolor=white];
+    
+    // 内核层 - 系统调用
+    Syscall [label="系统调用\n(syscall / ioctl)", fillcolor="#3498db", fontcolor=white];
+    
+    // Crypto API 层
+    CryptoAPI [label="Linux Crypto API\ncrypto/skcipher.c\ncrypto/ahash.c", fillcolor="#3498db", fontcolor=white];
+    
+    // Nuclei 驱动注册层
+    NucleiDriver [label="Nuclei 驱动注册\nnuclei_crypto.c", fillcolor="#3498db", fontcolor=white];
+    
+    // 算法模板层
+    SkcipherAlg [label="对称加密算法模板\nnuclei_crypto_skcipher.c\n(AES/SM4 ECB/CBC/CTR)", fillcolor="#3498db", fontcolor=white];
+    AhashAlg [label="哈希算法模板\nnuclei_crypto_ahash.c\n(SHA1/SHA256/MD5/HMAC)", fillcolor="#3498db", fontcolor=white];
+    
+    // Fallback 路径
+    Fallback [label="软件 Fallback\nAES-Generic / SHA-Software", fillcolor="#f39c12", fontcolor=white];
+    
+    // 调度层
+    Engine [label="Crypto Engine\n异步请求调度队列", fillcolor="#9b59b6", fontcolor=white];
+    
+    // Mailbox 层
+    Mailbox [label="Mailbox 驱动\nmbox_send_message()\n异步消息通道", fillcolor="#3498db", fontcolor=white];
+    
+    // HSM 硬件层
+    HSM [label="Nuclei HSM 硬件\n安全处理核\n(独立安全域)", fillcolor="#27ae60", fontcolor=white];
+    
+    // 返回路径
+    Complete [label="请求完成回调\ncrypto_finalize_request()", fillcolor="#27ae60", fontcolor=white];
+    
+    // 连接关系
+    UserApp -> Syscall [label="1. 调用加密/哈希"];
+    Syscall -> CryptoAPI [label="2. 进入内核 Crypto 子系统"];
+    CryptoAPI -> NucleiDriver [label="3. 查找已注册算法"];
+    
+    NucleiDriver -> SkcipherAlg [label="4a. 对称加密请求"];
+    NucleiDriver -> AhashAlg [label="4b. 哈希请求"];
+    
+    // Fallback 判断
+    SkcipherAlg -> Fallback [label="数据不对齐/\n长度不合法", style=dashed, color="#f39c12"];
+    AhashAlg -> Fallback [label="数据不对齐/\n长度不合法", style=dashed, color="#f39c12"];
+    Fallback -> Complete [label="软件计算完成", style=dashed, color="#f39c12"];
+    
+    // 正常硬件路径
+    SkcipherAlg -> Engine [label="5. 提交异步请求"];
+    AhashAlg -> Engine [label="5. 提交异步请求"];
+    
+    Engine -> Mailbox [label="6. DMA映射 +\n构建Mailbox命令"];
+    
+    Mailbox -> HSM [label="7. 发送 ABI 命令\n(HASH/CRYP/ACRYP)"];
+    
+    HSM -> Mailbox [label="8. 硬件处理完成\n中断通知"];
+    
+    Mailbox -> Complete [label="9. DMA解映射 +\n拷贝结果"];
+    
+    Complete -> CryptoAPI [label="10. 返回结果"];
+    CryptoAPI -> Syscall [label="11. 系统调用返回"];
+    Syscall -> UserApp [label="12. 用户空间收到数据"];
+    
+    // 标题
+    labelloc="t";
+    label="Nuclei HSM 密码学接口调用架构";
+    fontsize=16;
+    fontname="Arial";
+}

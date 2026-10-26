@@ -1,0 +1,110 @@
+digraph TFLM_FreeRTOS_Arch {
+    rankdir=TB;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11];
+    edge [fontname="Arial", fontsize=9];
+    
+    // 应用层
+    subgraph cluster_app {
+        label="用户应用层";
+        style=filled;
+        fillcolor="#f8f9fa";
+        color="#dee2e6";
+        
+        l1_task [label="L1检测任务\n(人形检测)", fillcolor="#3498db", fontcolor=white];
+        l2_task [label="L2识别任务\n(危险动作)", fillcolor="#3498db", fontcolor=white];
+        rec_task [label="录像任务", fillcolor="#3498db", fontcolor=white];
+        alarm_task [label="警报任务", fillcolor="#3498db", fontcolor=white];
+    }
+    
+    // FreeRTOS层
+    subgraph cluster_rtos {
+        label="FreeRTOS 内核";
+        style=filled;
+        fillcolor="#e9ecef";
+        color="#adb5bd";
+        
+        scheduler [label="任务调度器", fillcolor="#6c757d", fontcolor=white];
+        queues [label="队列/信号量\n(静态分配)", fillcolor="#6c757d", fontcolor=white];
+    }
+    
+    // TFLM层
+    subgraph cluster_tflm {
+        label="TensorFlow Lite Micro";
+        style=filled;
+        fillcolor="#fff3cd";
+        color="#ffc107";
+        
+        interpreter [label="MicroInterpreter\n(解释器)", fillcolor="#f39c12", fontcolor=white];
+        allocator [label="StaticAllocator\n(静态内存分配)", fillcolor="#f39c12", fontcolor=white];
+        ops [label="OpResolver\n(算子注册表)", fillcolor="#f39c12", fontcolor=white];
+    }
+    
+    // NMSIS-NN层
+    subgraph cluster_nmsis {
+        label="NMSIS-NN 加速库";
+        style=filled;
+        fillcolor="#d1ecf1";
+        color="#17a2b8";
+        
+        nnlib [label="神经网络内核\n(卷积/池化/全连接)", fillcolor="#17a2b8", fontcolor=white];
+    }
+    
+    // SDK/BSP层
+    subgraph cluster_sdk {
+        label="Nuclei SDK / BSP";
+        style=filled;
+        fillcolor="#d4edda";
+        color="#28a745";
+        
+        sdk_build [label="构建系统\n(Makefile)", fillcolor="#27ae60", fontcolor=white];
+        drivers [label="设备驱动\n(摄像头/SD卡/UART)", fillcolor="#27ae60", fontcolor=white];
+        startup [label="启动代码\n(链接脚本/启动文件)", fillcolor="#27ae60", fontcolor=white];
+    }
+    
+    // 硬件层
+    subgraph cluster_hw {
+        label="N600 硬件层";
+        style=filled;
+        fillcolor="#f8d7da";
+        color="#dc3545";
+        
+        cpu [label="N600FD CPU\n(rv32imafdc_xxldsp)", fillcolor="#e74c3c", fontcolor=white];
+        ilm [label="ILM (64KB)\n代码+常量", fillcolor="#c0392b", fontcolor=white];
+        dlm [label="DLM (64KB)\n栈+静态数据", fillcolor="#c0392b", fontcolor=white];
+        ddr [label="DDR (512MB+)\n模型+张量+帧缓冲", fillcolor="#c0392b", fontcolor=white];
+        camera [label="摄像头\n(CMOS接口)", fillcolor="#c0392b", fontcolor=white];
+    }
+    
+    // 连接
+    l1_task -> interpreter [label="调用推理"];
+    l2_task -> interpreter [label="调用推理"];
+    rec_task -> drivers [label="读取帧数据"];
+    alarm_task -> drivers [label="控制GPIO"];
+    
+    l1_task -> queues [style=dashed, label="通知"];
+    l2_task -> queues [style=dashed, label="通知"];
+    
+    interpreter -> allocator [label="分配张量"];
+    interpreter -> ops [label="解析算子"];
+    interpreter -> nnlib [label="加速计算"];
+    
+    nnlib -> cpu [label="执行指令"];
+    allocator -> ddr [label="张量存储"];
+    allocator -> dlm [label="小型缓冲"];
+    
+    sdk_build -> startup [label="链接"];
+    startup -> ilm [label="加载代码"];
+    drivers -> camera [label="采集图像"];
+    drivers -> cpu [label="控制外设"];
+    
+    scheduler -> l1_task [style=dashed, label="调度"];
+    scheduler -> l2_task [style=dashed, label="调度"];
+    scheduler -> rec_task [style=dashed, label="调度"];
+    scheduler -> alarm_task [style=dashed, label="调度"];
+    
+    // 标题
+    labelloc="t";
+    label="TFLite Micro + FreeRTOS 软件栈架构";
+    fontsize=14;
+}

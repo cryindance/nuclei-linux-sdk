@@ -1,0 +1,89 @@
+digraph P63_Flow {
+    rankdir=TB;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11];
+    edge [fontname="Arial", fontsize=9, arrowhead=vee];
+    
+    // 定义节点颜色
+    Start [label="P63LM 入口", fillcolor="#e74c3c", fontcolor=white];
+    Init [label="阶段初始化\nPHASCHNG 04024", fillcolor="#3498db", fontcolor=white];
+    IMU [label="IMU 状态检查\nR02BOTH", fillcolor="#3498db", fontcolor=white];
+    BurnInit [label="初始化燃烧参数\n初始化 DVMON\n初始化 WCHPHASE", fillcolor="#3498db", fontcolor=white];
+    Flag [label="标志位设置\n(NOTHRFL, REDFLAG, LRBYPASS)\n终止 P20/P25", fillcolor="#3498db", fontcolor=white];
+    
+    // 点火算法
+    IgAlg [label="IGNALG 点火算法", fillcolor="#9b59b6", fontcolor=white, shape=doubleoctagon];
+    Calc [label="计算着陆点坐标\n状态积分到预计点火时间", fillcolor="#3498db", fontcolor=white];
+    Iter [label="迭代计算\nDDUMCALC (最多40次)", fillcolor="#3498db", fontcolor=white];
+    Converge [label="收敛检查\n|ΔDDUM| < DDUMCRIT", fillcolor="#f39c12", fontcolor=black, shape=diamond];
+    Align [label="姿态对准\nR60LEM 计算姿态", fillcolor="#3498db", fontcolor=white];
+    
+    // 制导阶段
+    BurnBaby [label="BURNBABY\n主发动机启动", fillcolor="#e74c3c", fontcolor=white, shape=doubleoctagon];
+    Braking [label="BRAKQUAD\n制动阶段 (P63)", fillcolor="#3498db", fontcolor=white];
+    Approach [label="APPRQUAD\n接近阶段 (P64)", fillcolor="#9b59b6", fontcolor=white];
+    Vertical [label="VERTICAL\n垂直下降 (P65-67)", fillcolor="#27ae60", fontcolor=white];
+    
+    // 制导循环内部
+    TTF [label="计算 TTF/8\n(剩余飞行时间)", fillcolor="#3498db", fontcolor=white];
+    Quad [label="二次制导方程\nQUADGUID", fillcolor="#3498db", fontcolor=white];
+    CG [label="CG 矩阵计算\n制导坐标系到稳定坐标系", fillcolor="#3498db", fontcolor=white];
+    Throttle [label="推力控制\nTHROTTLE", fillcolor="#e67e22", fontcolor=white];
+    Steer [label="姿态控制\nFINDCDUW", fillcolor="#e67e22", fontcolor=white];
+    
+    // 显示
+    Display [label="显示更新\nV06N63/64/60", fillcolor="#16a085", fontcolor=white];
+    Redesign [label="着陆点重选?\n(P64)", fillcolor="#f39c12", fontcolor=black, shape=diamond];
+    Manual [label="手动控制?\nP66/P67", fillcolor="#f39c12", fontcolor=black, shape=diamond];
+    
+    // 结束
+    Land [label="LANDJUNK\n着陆确认 (P68)", fillcolor="#27ae60", fontcolor=white, shape=doubleoctagon];
+    Abort [label="中止程序\nABORT", fillcolor="#95a5a6", fontcolor=white];
+    
+    // 边
+    Start -> Init;
+    Init -> IMU;
+    IMU -> BurnInit;
+    BurnInit -> Flag;
+    Flag -> IgAlg;
+    
+    IgAlg -> Calc;
+    Calc -> Iter;
+    Iter -> Converge;
+    Converge -> Iter [label="未收敛"];
+    Converge -> Align [label="已收敛"];
+    
+    Align -> BurnBaby;
+    BurnBaby -> Braking;
+    
+    Braking -> TTF;
+    Approach -> TTF;
+    Vertical -> TTF;
+    
+    TTF -> Quad;
+    Quad -> CG;
+    CG -> Throttle;
+    Throttle -> Steer;
+    Steer -> Display;
+    
+    Display -> Redesign;
+    Redesign -> Approach [label="否"];
+    Display -> Manual;
+    Manual -> Vertical [label="是"];
+    
+    Braking -> Approach [label="TTF/8 < TENDBRAK"];
+    Approach -> Vertical [label="TTF/8 < TENDBRAK"];
+    
+    Display -> Braking [label="循环"];
+    Manual -> Approach [label="否"];
+    
+    Vertical -> Land [label="着陆"];
+    Braking -> Abort [label="紧急中止", style=dashed];
+    Approach -> Abort [label="紧急中止", style=dashed];
+    
+    // 标题
+    labelloc="t";
+    label="P63 登月主程序执行流程图";
+    fontsize=16;
+    fontname="Arial";
+}

@@ -1,0 +1,68 @@
+digraph BuildDependency {
+    rankdir=BT;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=10];
+    edge [fontname="Arial", fontsize=8];
+
+    // ========== Level 0: 基础环境/工具链 ==========
+    target_gcc [label="RISC-V 交叉工具链\n(target_gcc)", fillcolor="#95a5a6", fontcolor=white];
+    buildroot_sysroot [label="Buildroot 根文件系统\n(buildroot_initramfs_sysroot)", fillcolor="#95a5a6", fontcolor=white];
+
+    // ========== Level 1: 核心组件编译 ==========
+    platform_dtb [label="平台设备树 DTB\n(nuclei_rv64imafdc.dtb)", fillcolor="#3498db", fontcolor=white];
+    opensbi [label="OpenSBI 固件\n(fw_jump.bin)", fillcolor="#9b59b6", fontcolor=white];
+    optee_os [label="OP-TEE OS\n(tee-pager_v2.bin)", fillcolor="#9b59b6", fontcolor=white];
+    uboot [label="U-Boot\n(u-boot.bin / u-boot-spl-nodtb.bin)", fillcolor="#9b59b6", fontcolor=white];
+    linux_image [label="Linux 内核镜像\n(arch/riscv/boot/Image)", fillcolor="#e67e22", fontcolor=white];
+
+    // ========== Level 2: 中间产物 ==========
+    spl_dtb [label="SPL DTB\n(spl.dtb)", fillcolor="#3498db", fontcolor=white];
+    uboot_spl_itb [label="SPL ITB\n(uboot_spl.itb)", fillcolor="#3498db", fontcolor=white];
+    initramfs [label="Initramfs\n(initramfs.cpio.gz)", fillcolor="#e67e22", fontcolor=white];
+    uboot_spl_bin [label="SPL 二进制\n(u-boot-spl-nodtb.bin)", fillcolor="#3498db", fontcolor=white];
+
+    // ========== Level 3: SD 卡启动镜像 ==========
+    boot_zip [label="SD 卡启动包\n(boot.zip)", fillcolor="#f1c40f", fontcolor=black, shape=folder];
+
+    // ========== Level 4: 最终产物 ==========
+    freeloader_elf [label="freeloader.elf\n(最终引导程序)", fillcolor="#27ae60", fontcolor=white, shape=component, width=2.2, height=0.7];
+
+    // ========== 依赖边 ==========
+    // Level 0 -> Level 1
+    target_gcc -> platform_dtb [color="#7f8c8d"];
+    target_gcc -> opensbi [color="#7f8c8d"];
+    target_gcc -> optee_os [color="#7f8c8d"];
+    target_gcc -> uboot [color="#7f8c8d"];
+    target_gcc -> linux_image [color="#7f8c8d"];
+
+    buildroot_sysroot -> initramfs [color="#7f8c8d"];
+    optee_os -> initramfs [color="#7f8c8d", constraint=false];
+    linux_image -> initramfs [color="#7f8c8d"];
+
+    // Level 1 -> Level 2
+    platform_dtb -> uboot [color="#7f8c8d"];
+    platform_dtb -> spl_dtb [color="#7f8c8d", label="拷贝"];
+    spl_dtb -> uboot_spl_itb [color="#7f8c8d"];
+    opensbi -> uboot_spl_itb [color="#7f8c8d"];
+    optee_os -> uboot_spl_itb [color="#7f8c8d"];
+    uboot -> uboot_spl_itb [color="#7f8c8d"];
+    uboot -> uboot_spl_bin [color="#7f8c8d", style=dashed, label="产出"];
+
+    // Level 1/2 -> Level 3
+    linux_image -> boot_zip [color="#7f8c8d", label="lz4 压缩后"];
+    initramfs -> boot_zip [color="#7f8c8d", label="lz4 压缩后"];
+    platform_dtb -> boot_zip [color="#7f8c8d", label="拷贝为 kernel.dtb"];
+    uboot -> boot_zip [color="#7f8c8d", label="mkimage"];
+
+    // Level 1/2/3 -> Level 4
+    spl_dtb -> freeloader_elf [color="#2c3e50", penwidth=1.5];
+    uboot_spl_bin -> freeloader_elf [color="#2c3e50", penwidth=1.5];
+    uboot_spl_itb -> freeloader_elf [color="#2c3e50", penwidth=1.5];
+    boot_zip -> freeloader_elf [color="#2c3e50", penwidth=1.5, label="BOOT_MODE=sd\n(仅作构建依赖)"];
+
+    // 标题
+    labelloc="t";
+    label="make freeloader 构建顺序依赖图 (BOOT_MODE=sd)";
+    fontsize=16;
+    fontname="Arial";
+}

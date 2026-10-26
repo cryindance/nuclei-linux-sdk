@@ -1,0 +1,47 @@
+digraph FreeloaderComposition {
+    rankdir=TB;
+    fontname="Arial";
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11];
+    edge [fontname="Arial", fontsize=9];
+
+    // 顶层节点
+    freeloader [label="freeloader.elf\n第一阶段引导程序", fillcolor="#27ae60", fontcolor=white, shape=component, width=2.5, height=0.8];
+
+    // freeloader.elf 直接成员
+    spl [label="SPL\nu-boot-spl-nodtb.bin\n(早期启动初始化)", fillcolor="#3498db", fontcolor=white];
+    itb [label="SPL ITB\nuboot_spl.itb\n(FIT 打包镜像)", fillcolor="#3498db", fontcolor=white];
+    dtb [label="设备树 DTB\nspl.dtb\n(硬件配置描述)", fillcolor="#3498db", fontcolor=white];
+    amp [label="AMP 固件\nampfw_core*.bin\n(非对称多处理)", fillcolor="#e74c3c", fontcolor=white];
+
+    // SD 卡内容（不属于 freeloader.elf）
+    sdcard [label="SD Card\n(boot.zip)", fillcolor="#f39c12", fontcolor=white, shape=folder, width=1.5];
+    kernel [label="内核镜像\nkernel.itb\n(Linux + rootfs)", fillcolor="#f39c12", fontcolor=white];
+
+    // ITB 内部子成员
+    opensbi [label="OpenSBI\nfw_jump.bin\n(RISC-V SBI 固件)", fillcolor="#9b59b6", fontcolor=white];
+    uboot [label="U-Boot\nu-boot.bin\n(引导加载程序)", fillcolor="#9b59b6", fontcolor=white];
+    optee [label="OP-TEE OS\ntee-pager_v2.bin\n(安全世界固件)", fillcolor="#9b59b6", fontcolor=white];
+    itb_dtb [label="签名公钥\n(spl.dtb 内)\n(RSA 安全启动)", fillcolor="#9b59b6", fontcolor=white];
+
+    // freeloader.elf 内部连接
+    freeloader -> spl;
+    freeloader -> itb;
+    freeloader -> dtb;
+    freeloader -> amp [style=dashed, label="AMP 使能时"];
+
+    // SD 卡关系（不属于 freeloader.elf）
+    sdcard -> kernel [color="#7f8c8d", fontsize=8];
+    uboot -> sdcard [color="#7f8c8d", fontsize=8, label="启动时加载", style=dashed];
+
+    // ITB 内部展开
+    itb -> opensbi [color="#7f8c8d", fontsize=8];
+    itb -> uboot [color="#7f8c8d", fontsize=8];
+    itb -> optee [color="#7f8c8d", fontsize=8];
+    itb -> itb_dtb [color="#7f8c8d", fontsize=8];
+
+    // 标题
+    labelloc="t";
+    label="freeloader.elf 成员构成图 (BOOT_MODE=sd)";
+    fontsize=16;
+    fontname="Arial";
+}

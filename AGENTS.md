@@ -472,12 +472,13 @@ make upload_freeloader
 | OP-TEE 提交分析 | [doc/optee/提交代码详细分析.md](doc/optee/提交代码详细分析.md) | 逐条提交分析与关联关系 |
 | OpenSBI 入门 | [doc/opensbi/OpenSBI学习与开发文档.md](doc/opensbi/OpenSBI学习与开发文档.md) | 架构、启动流程与开发指引 |
 | OpenSBI 改动 | [doc/opensbi/opensbi代码修改说明.md](doc/opensbi/opensbi代码修改说明.md) | 本 SDK 对 OpenSBI 的改动点 |
+| U-Boot 修改 | [doc/uboot/uboot修改分析.md](doc/uboot/uboot修改分析.md) | U-Boot Nuclei HSM 分支 6 个提交的逐项分析 |
 | 密码学接口 | [doc/crypto/nuclei_linux密码学接口.md](doc/crypto/nuclei_linux密码学接口.md) | HSM + Mailbox 加解密/哈希接口 |
 | 构建流程 | [doc/build/make%20freeloader的构建顺序.md](doc/build/make%20freeloader的构建顺序.md) | freeloader 构建依赖与执行顺序 |
 | Patch 对比 | [doc/patch/Patch文件对比分析报告.md](doc/patch/Patch文件对比分析报告.md) | 与上游逐文件对比分析 |
 
 **文档维护约定：**
-- 新增文档按主题放入 `doc/<主题>/`（`hsm` / `optee` / `opensbi` / `crypto` / `build` / `patch` / `misc`）
+- 新增文档按主题放入 `doc/<主题>/`（`hsm` / `optee` / `opensbi` / `uboot` / `crypto` / `build` / `patch` / `misc`）
 - 图片目录命名为 `{文档名}_images/`，与文档同目录，使用相对路径引用
 - Graphviz 图表保留 `.dot` 源文件，导出 SVG
 - 新增或重命名文档后同步更新 `doc/README.md` 与本索引

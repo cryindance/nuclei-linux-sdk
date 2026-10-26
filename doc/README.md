@@ -44,7 +44,12 @@
 |------|------|
 | [Patch文件对比分析报告.md](patch/Patch文件对比分析报告.md) | SDK patch 文件与上游的逐文件对比分析（含 patch 结构与对比图） |
 
-### 7. 图片与图表（无对应独立文档）
+### 7. U-Boot
+| 文档 | 说明 |
+|------|------|
+| [uboot修改分析.md](uboot/uboot修改分析.md) | U-Boot Nuclei HSM 分支（dev_hsm）6 个提交的逐项修改分析：RISC-V 启动层、板级初始化、Mailbox HSM 驱动 |
+
+### 8. 图片与图表（无对应独立文档）
 | 目录 | 说明 |
 |------|------|
 | [misc/Apollo11_P63_images/](misc/Apollo11_P63_images/) | Apollo11 P63 平台流程图 |
@@ -62,7 +67,7 @@
 
 ## 三、文档维护约定
 
-1. **新增文档按主题放入对应子目录**（`hsm/`、`optee/`、`opensbi/`、`crypto/`、`build/`、`patch/`、`misc/`）
+1. **新增文档按主题放入对应子目录**（`hsm/`、`optee/`、`opensbi/`、`uboot/`、`crypto/`、`build/`、`patch/`、`misc/`）
 2. **图片目录命名为 `{文档名}_images/`**，与文档放在同一目录，引用使用相对路径
 3. 图表使用 Graphviz DOT 生成 SVG，**保留 `.dot` 源文件**
 4. 新增或重命名文档后，**同步更新本索引**
